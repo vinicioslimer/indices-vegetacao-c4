@@ -12,7 +12,11 @@ from . import indices
 
 MAX_UPLOAD_BYTES = 50 * 1024 * 1024
 
-app = FastAPI(title="Índices de Vegetação API", version="1.0.0")
+app = FastAPI(
+    title="Índices de Vegetação API",
+    version="1.0.0",
+    description="Calcula NDVI e NDRE de imagens de satélite: estatísticas, área por classe de vigor e mapa colorido.",
+)
 
 
 def _fail(detail: str, status_code: int = 422):
@@ -69,7 +73,7 @@ def _process(src, red: int, nir: int, rededge: int | None, geometry: str | None)
     return result
 
 
-@app.post("/indices")
+@app.post("/indices", tags=["índices"], summary="Calcula NDVI/NDRE de um GeoTIFF multibanda")
 def calcular_indices(
     file: UploadFile = File(..., description="GeoTIFF multibanda em CRS projetado (metros)"),
     red: int = Form(..., ge=1, description="número da banda do vermelho (começa em 1)"),
