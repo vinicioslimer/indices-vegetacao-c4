@@ -6,12 +6,33 @@ quartis), **área em hectares por classe de vigor** e um **mapa colorido em PNG*
 talhão é opcional e aceita o polígono em GeoJSON (lat/lon), do jeito que se exporta do QGIS ou do
 geojson.io.
 
+<p align="center">
+  <img src="docs/cor-para-ndvi.gif" width="400" alt="Imagem Sentinel-2 de pivôs centrais alternando entre cor verdadeira e o mapa de NDVI por classe de vigor">
+  <br>
+  <sub>Pivôs centrais em Cristalina (GO), Sentinel-2 de 31/08/2026: cor verdadeira e o NDVI calculado pela API. O círculo branco é o talhão de exemplo.</sub>
+</p>
+
 Mini-projeto do Curso 4 (Laboratório Introdutório: Construindo um Mini-projeto com IA Generativa)
 da Especialização em Engenharia de Software com IA Generativa (UFG/AKCIT).
 
 ## Demonstração
 
-Imagem Sentinel-2 de 31/08/2026 sobre pivôs centrais em Cristalina (GO), processada pela API:
+### No navegador, pela documentação interativa
+
+Com a API rodando (`make run`), a página `/docs` permite testar tudo sem escrever código: enviar o
+GeoTIFF, informar as bandas, colar o GeoJSON do talhão e executar. O GIF termina com o PNG que
+veio na resposta, decodificado.
+
+![Fluxo completo no Swagger UI: upload do GeoTIFF, preenchimento das bandas e do polígono, execução e resposta com estatísticas e áreas por classe](docs/demo-swagger.gif)
+
+### No terminal
+
+`make test` com os 20 testes, e depois uma chamada com `curl`, usando o `jq` para esconder o PNG em
+base64 e mostrar só as estatísticas do NDVI:
+
+![Terminal rodando make test com 20 testes passando e depois uma chamada curl à API](docs/demo-terminal.gif)
+
+### Resultado
 
 | Cor verdadeira | NDVI da janela (4 x 4 km) | NDVI do talhão recortado |
 | --- | --- | --- |
@@ -79,6 +100,9 @@ curl -F file=@exemplos/talhao.tif -F red=1 -F rededge=2 -F nir=3 \
 
 Repare no `<` em `geometry`: ele envia o **conteúdo** do arquivo como texto. Com `@` o curl
 enviaria o GeoJSON como arquivo e a API responderia 422.
+
+Para ler só as estatísticas, sem o PNG em base64 (requer [jq](https://jqlang.org/)), acrescente
+`| jq '.ndvi | del(.png)'` ao comando.
 
 Resposta (PNG encurtado):
 
@@ -180,6 +204,12 @@ testada da mesma ideia, com dados abertos do Sentinel-2, sem código nem dados d
 - **Avisos de depreciação.** Antes de silenciar os avisos no `pytest.ini`, foi confirmado que
   vinham de dentro do rasterio/affine, e não do código do projeto.
 
+**Documentação visual.** Os GIFs também foram produzidos com a IA: ela dirigiu o navegador com
+Playwright pelo Swagger e montou os quadros com o Pillow. Olhar os quadros gravados mostrou dois
+acabamentos que faltavam e que passaram despercebidos nos testes: o Swagger exibia o grupo
+genérico "default" e o resumo "Calcular Indices" (a API ganhou título, descrição e tag), e os
+testes parametrizados apareciam como `<lambda>0`, `<lambda>1` (ganharam nomes legíveis).
+
 ## Limitações e próximos passos
 
 - **Sem máscara de nuvem e sombra.** Pixels de nuvem entram nas estatísticas. O próximo passo
@@ -200,6 +230,10 @@ testada da mesma ideia, com dados abertos do Sentinel-2, sem código nem dados d
 (reamostrada de 20 m para 10 m) e B08 da cena Sentinel-2 L2A `S2B_23LKC_20260831_0_L2A`, obtida
 no catálogo público Earth Search (Element84). Os valores são reflectância de superfície x 10000.
 `exemplos/talhao.geojson` é o contorno aproximado de um dos pivôs da imagem.
+
+Os GIFs em `docs/` mostram a API rodando localmente com esses arquivos. O do Swagger é uma
+sequência de capturas do navegador (Playwright + Chrome). O do terminal é renderizado a partir das
+saídas reais de `make test` e do `curl`.
 
 Contains modified Copernicus Sentinel data 2026.
 
