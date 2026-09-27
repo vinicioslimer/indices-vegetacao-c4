@@ -69,7 +69,7 @@ def test_ndre_when_rededge_is_sent(tiff):
     lambda g: g,
     lambda g: {"type": "Feature", "properties": {}, "geometry": g},
     lambda g: {"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {}, "geometry": g}]},
-])
+], ids=["polygon", "feature", "featurecollection"])
 def test_clip_by_polygon_in_wgs84(tiff, wrap):
     ndvi = post(tiff, geometry=json.dumps(wrap(left_half_geojson()))).json()["ndvi"]
     assert ndvi["pixels"] == 50
@@ -85,7 +85,11 @@ def test_polygon_outside_raster(tiff):
     assert "não cruza" in resp.json()["detail"]
 
 
-@pytest.mark.parametrize("geometry", ["{x", "{}", "[1, 2]", '{"type": "Polygon", "coordinates": "x"}'])
+@pytest.mark.parametrize(
+    "geometry",
+    ["{x", "{}", "[1, 2]", '{"type": "Polygon", "coordinates": "x"}'],
+    ids=["json-quebrado", "objeto-vazio", "lista", "coordenadas-invalidas"],
+)
 def test_invalid_geometry(tiff, geometry):
     resp = post(tiff, geometry=geometry)
     assert resp.status_code == 422

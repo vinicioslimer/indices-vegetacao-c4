@@ -8,4 +8,4 @@ run:
 	.venv/bin/uvicorn vegetacao.main:app --reload
 
 test:
-	.venv/bin/python -m pytest
+	.venv/bin/python -m pytest -v
